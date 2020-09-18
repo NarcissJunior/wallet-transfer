@@ -13,11 +13,11 @@ services:
             - ./nginx/conf:/etc/nginx/conf.d
             - ./nginx/logs:/var/log/nginx/
         depends_on:
-            - transfer
+            - wallet
 
-    transfer:
+    wallet:
         build: ./php
-        container_name: transfer
+        container_name: wallet
         networks:
             - backend
             - frontend
@@ -27,9 +27,8 @@ services:
             - database
         links:
             - database
-
         env_file:
-            environment.env
+            ../.env
 
     database:
         container_name: database
@@ -42,8 +41,10 @@ services:
         networks:
             - backend
         environment:
+            - MYSQL_DATABASE=wallet-transfer
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=root
             - MYSQL_ROOT_PASSWORD=root
-            - MYSQL_DATABASE=transfer
 
 networks:
     backend:
