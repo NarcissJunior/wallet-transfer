@@ -20,3 +20,5 @@ Route::get('/', function () {
 });
 
 Route::get('/test', [UserController::class, 'test']);
+
+Route::get('/transaction');
