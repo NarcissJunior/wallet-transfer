@@ -4,5 +4,6 @@ namespace App\Repositories\Contracts;
 
 interface UserRepositoryInterface
 {
-    public function test(User $user);
+    public function getBalanceAttribute(User $user);
+    public function setBalanceAttribute($amount);
 }

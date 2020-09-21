@@ -21,4 +21,21 @@ class Transaction extends Model
         'customer_payee_id',
         'value'
     ];
+
+    //Accessors
+    public function getCustomerPayerIdAttribute($payerId)
+    {
+        return ucfirst($payerId);
+    }
+
+    public function getCustomerPayeeIdAttribute($payeeId)
+    {
+        return ucfirst($payeeId);
+    }
+
+    public function getValueAttribute($value)
+    {
+        return ucfirst($value);
+    }
+
 }

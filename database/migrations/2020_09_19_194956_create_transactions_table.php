@@ -15,10 +15,13 @@ class CreateTransactionsTable extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->integer('customer_payer_id');
-            $table->integer('customer_payee_id');
+            $table->unsignedBigInteger('customer_payer_id');
+            $table->unsignedBigInteger('customer_payee_id');
             $table->float('value', 8, 2);
             $table->timestamps();
+
+            $table->foreign('customer_payer_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('customer_payee_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

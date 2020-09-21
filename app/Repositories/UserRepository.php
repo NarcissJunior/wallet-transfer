@@ -3,15 +3,10 @@
 namespace App\Repositories;
 
 use App\Repositories\Contracts\UserRepositoryInterface;
-use App\Services\UserService;
 use App\Models\User;
 
 class UserRepository implements UserRepositoryInterface
 {
-    use UserService;
-
-
-    /*
     protected $user;
 
     public function __construct(User $user)
@@ -19,9 +14,14 @@ class UserRepository implements UserRepositoryInterface
         $this->user = $user;
     }
 
-    public function test()
+    public function getBalanceAttribute($id)
     {
-        return $this->user->test();
+        $xablau = $this->user->find($id);
+        return $xablau;
     }
-    */
+
+    public function setBalanceAttribute($amount)
+    {
+        return $amount;
+    }
 }

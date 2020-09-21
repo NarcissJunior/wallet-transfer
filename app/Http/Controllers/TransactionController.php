@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
+use App\Models\Transaction;
+
 //verificar
 // use App\Providers\TransactionServiceProvider;
 use App\Services\TransactionService;
@@ -28,8 +30,7 @@ class TransactionController extends Controller
             ], 400);
         }
 
-        //chamando o serviço e passando a request
-        $this->service->save($request);
+        return $this->service->create($request);
 
     }
 
