@@ -11,6 +11,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'transactions';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -33,5 +35,13 @@ class User extends Authenticatable
     protected $hidden = [
         'password'
     ];
+
+    //construir um função para checar o tipo de usuário para validar se ele pode ou nao receber uma transferencia
+
+    //Relacionamento entre o user e a wallet
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class, 'user_id', 'id');
+    }
 
 }

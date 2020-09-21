@@ -4,5 +4,5 @@ namespace App\Repositories\Contracts;
 
 interface UserRepositoryInterface
 {
-    public function test();
+    public function test(User $user);
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Transaction;
 
 class TransactionService
 {
@@ -23,8 +24,10 @@ public function __construct(
         // $this->logger = $logger;
     }
 
-    public function create(TransactionDTO $transactionDTO): void
+    public function save(Request $request)
     {
-        
+        return 'ok';
     }
+
+    //aqui eu vou chamar o transactionRepository
 }
