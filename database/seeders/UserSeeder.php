@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
 
         //Pessoa física
         DB::table('users')->insert([
-            'name' => Str::random(10),
+            'name' => 'Outra Pessoa Física',
             'email' => Str::random(10).'@email.com',
             'document' => '21987654321',
             'type' => 'pf',
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
 
         //Pessoa Jurídica
         DB::table('users')->insert([
-            'name' => Str::random(10),
+            'name' => 'Outra Pessoa Jurídica',
             'email' => Str::random(10).'@email.com',
             'document' => '54321987654321',
             'type' => 'pj',

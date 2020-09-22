@@ -29,20 +29,17 @@ class UserService
         $this->addValue($infos->payee, $infos->value);
     }
 
-    public function subtractValue($payer, $amount)
+    private function subtractValue($payer, $amount)
     {
         $user = User::findOrFail($payer);
-        $total = $user->balance - $amount;
-        $user->balance($total);
-        // $user->setAttribute('balance', $total);
+        $user->balance = $user->balance - $amount;
+        $user->save();
     }
 
-    public function addValue($payee, $amount)
+    private function addValue($payee, $amount)
     {
         $user = User::findOrFail($payee);
-        $total = $user->balance + $amount;
-        $user->balance($total);
-        // $user->setAttribute('balance', $total);
+        $user->balance = $user->balance + $amount;
+        $user->save();
     }
-
 }

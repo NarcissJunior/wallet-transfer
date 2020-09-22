@@ -26,7 +26,7 @@ class TransactionService
         $this->transaction = $transaction;
     }
 
-    public function create($request): void
+    public function create($request)
     {
         try
         {
@@ -39,37 +39,40 @@ class TransactionService
             $this->verifyTransaction($request);
             // $this->transaction->save();
 
-            $this->updateCustomersBalance($request);
+            return $this->updateCustomersBalance($request);
 
         } catch (Throwable $e) {
 
         }
     }
 
-    public function verifyTransaction($request)
+    private function verifyTransaction($request)
     {
         if(!$this->validateUserType($request->payer))
         {
-            return "Este usuário não tem permissão para fazer uma transferência";
+            return response()->json([
+                'error' => 'Este usuário não tem permissão para fazer uma transferência'
+            ], 400);
         }
 
-        if(!$this->validateFunds($request->value))
+        if(!$this->validateFunds($request->payer, $request->value))
         {
-            return "Este usuário não tem saldo suficiente para realizar esta transação";
+            return response()->json([
+                'error' => 'Este usuário não tem saldo suficiente para realizar esta transação'
+            ], 400);
         }
-        
+
+        //verificar
         if(!$this->validateThirdService())
         {
-            return "Esta transação não foi autorizada";
+            return response()->json([
+                'error' => 'Esta transação não foi autorizada'
+            ], 400);
         }
+        return true;
     }
 
-    public function updateCustomersBalance($request): void
-    {
-        $this->userService->updateBalance($request);
-    }
-
-    public function validateUserType($userId): bool
+    private function validateUserType($userId): bool
     {
         $userType = $this->userService->findTypeById($userId);
         if($userType === 'pj')
@@ -79,21 +82,28 @@ class TransactionService
         return true;
     }
 
-    public function validateFunds($userId): bool
+    private function validateFunds($userId, $amount): bool
     {
         $userBalance = $this->userService->findBalanceById($userId);
-        if($userBalance < $request->value)
+        if($userBalance < $amount)
         {
             return false;
         }
         return true;
     }
 
-    public function validateThirdService(): bool
+    private function validateThirdService(): bool
     {
-        // $response = $this->validationService->validate('GET', 'https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6');
+        $response = $this->validationService->validate('GET', 'https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6');
         return true;
     }
+
+    
+    private function updateCustomersBalance($request)
+    {
+        return $this->userService->updateBalance($request);
+    }
+
 
     // //Inicio da transaction para atualizar o saldo
     // DB::beginTransaction();
