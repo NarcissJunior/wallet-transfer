@@ -21,6 +21,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/test', [UserController::class, 'test']);
-
 Route::post('/transaction', [TransactionController::class, 'transfer']);

@@ -5,11 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 
-use App\Models\Transaction;
-
-//verificar
-// use App\Providers\TransactionServiceProvider;
 use App\Services\TransactionService;
+use App\Models\Transaction;
 
 class TransactionController extends Controller
 {
