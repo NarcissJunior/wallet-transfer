@@ -3,89 +3,109 @@
 namespace App\Services;
 
 use App\Services\ValidationService;
+use App\Services\UserService;
 use App\Models\Transaction;
 use App\Models\User;
 
 class TransactionService
 {
 
-    protected Transaction $transaction;
     protected ValidationService $validationService;
-
+    protected Transaction $transaction;
+    protected UserService $userService;
 
     public function __construct(
+        ValidationService $validationService,
         Transaction $transaction,
-        ValidationService $validationService
+        UserService $userService
+
 
     ) {
-        $this->transaction = $transaction;
         $this->validationService = $validationService;
+        $this->userService = $userService;
+        $this->transaction = $transaction;
     }
 
-    public function create($request)
+    public function create($request): void
     {
-        $this->transaction->fill([
-            'customer_payer_id' => $request->payer,
-            'customer_payee_id' => $request->payee,
-            'value' => $request->value
-        ]);
+        try
+        {
+            $this->transaction->fill([
+                'customer_payer_id' => $request->payer,
+                'customer_payee_id' => $request->payee,
+                'value' => $request->value
+            ]);
 
-        $this->transaction->save();
+            $this->verifyTransaction($request);
+            // $this->transaction->save();
 
-        $user = User::findOrFail($request->payer);
-        // return $user;
+            $this->updateCustomersBalance($request);
 
-        $response = $this->validationService->validate('GET', 'https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6');
-        return $response;
+        } catch (Throwable $e) {
 
-        // $payerBalance = $this->user->getBalanceAttribute($request->payer);
-        // $payeeBalance = $this->user->getBalanceAttribute($request->payee);
+        }
+    }
+
+    public function verifyTransaction($request)
+    {
+        if(!$this->validateUserType($request->payer))
+        {
+            return "Este usuário não tem permissão para fazer uma transferência";
+        }
+
+        if(!$this->validateFunds($request->value))
+        {
+            return "Este usuário não tem saldo suficiente para realizar esta transação";
+        }
         
-        // $amountToReceive = $payeeBalance + $request->value;
-        // $amountToDiscount = $payerBalance - $request->value;
-
-        // $this->user->setBalanceAttribute($request->payer, $amountToDiscount);
-        // $this->user->setBalanceAttribute($request->payee, $amountToReceive);
-
+        if(!$this->validateThirdService())
+        {
+            return "Esta transação não foi autorizada";
+        }
     }
 
-    public function findBalanceById($id)
+    public function updateCustomersBalance($request): void
     {
-        return User::where('id', $id)
-            ->where();
+        $this->userService->updateBalance($request);
     }
 
-    public function isCpnj($id)
+    public function validateUserType($userId): bool
     {
-        return User::where('id', $id)
-            ->where('type');
+        $userType = $this->userService->findTypeById($userId);
+        if($userType === 'pj')
+        {
+            return false;
+        }
+        return true;
     }
 
+    public function validateFunds($userId): bool
+    {
+        $userBalance = $this->userService->findBalanceById($userId);
+        if($userBalance < $request->value)
+        {
+            return false;
+        }
+        return true;
+    }
 
+    public function validateThirdService(): bool
+    {
+        // $response = $this->validationService->validate('GET', 'https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6');
+        return true;
+    }
 
-    
     // //Inicio da transaction para atualizar o saldo
     // DB::beginTransaction();
     // try {
-    //     DB::table('users')->update(['balance' => $request->value]);
-    //     DB::table('users')->update([
-    //         'payer_id' => $request->
-    //         'balance' => $request->value
-    //     ]);
-
     //     DB::commit();
-    //     $this->sendNotification();
     // }
     // catch (\Exception $e) {
     //     DB::rollBack();
-
-    //     //verificar
     //     return response()->json([
     //         'error' => 'Houve uma falha ao inserir os dados no banco'
     //     ], 400);
-
     //     //verificar
     //     // throw new Exception($e->getMessage());
     // }
-
 }

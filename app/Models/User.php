@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $table = 'transactions';
+    protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.
@@ -33,14 +33,18 @@ class User extends Authenticatable
         return $this->hasOne(Wallet::class, 'user_id', 'id');
     }
 
-    public function getBalanceAttribute($balance)
+    public function getBalanceAttribute()
     {
         return $this->attributes['balance'];
+    }
+
+    public function getTypeAttribute()
+    {
+        return $this->attributes['type'];
     }
 
     public function setBalanceAttribute($amount)
     {
         $this->attributes['balance'] = $amount;
     }
-
 }
