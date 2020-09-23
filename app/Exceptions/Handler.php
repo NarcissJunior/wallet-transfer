@@ -36,12 +36,4 @@ class Handler extends ExceptionHandler
     {
         //
     }
-
-    // public function render(Exception $exception)
-    // {
-    //     if ($exception instanceof ModelNotFoundException)
-    //     {
-    //         return response()->json('Usuário não encontrado!', 404);
-    //     }
-    // }
 }
