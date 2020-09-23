@@ -7,8 +7,9 @@ use App\Models\User;
 class UserService
 {
 
-    public function __construct() {
-
+    public function findUser($id)
+    {
+        return User::findOrFail($id);
     }
 
     public function findBalanceById($id)

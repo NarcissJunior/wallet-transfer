@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Exception;
 
 class Handler extends ExceptionHandler
 {
@@ -34,4 +36,12 @@ class Handler extends ExceptionHandler
     {
         //
     }
+
+    // public function render(Exception $exception)
+    // {
+    //     if ($exception instanceof ModelNotFoundException)
+    //     {
+    //         return response()->json('Usuário não encontrado!', 404);
+    //     }
+    // }
 }
