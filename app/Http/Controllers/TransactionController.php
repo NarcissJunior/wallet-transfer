@@ -26,9 +26,7 @@ class TransactionController extends Controller
                 'error' => 'Favor inserir os dados obrigatórios corretamente!'
             ], 400);
         }
-
         return $this->service->create($request);
-
     }
 
     public function validateRequest(Request $request)
@@ -41,5 +39,4 @@ class TransactionController extends Controller
 
         return $validator;
     }
-
 }
