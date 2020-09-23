@@ -50,7 +50,7 @@ class TransactionService
         catch (Exception $e)
         {
             DB::rollBack();
-            throw new Exception($e);
+            return $e->getMessage();
         }
 
         return response()->json([
@@ -60,51 +60,32 @@ class TransactionService
 
     private function verifyTransaction($request)
     {
-        try
+        if(!$this->validateUserType($request->payer))
         {
-            if(!$this->validateUserType($request->payer))
-            {
-                return response()->json([
-                    'error' => 'Este usuário não tem permissão para fazer uma transferência'
-                ], 400);
-            }
-
-            if(!$this->validateFunds($request->payer, $request->value))
-            {
-                return response()->json([
-                    'error' => 'Este usuário não tem saldo suficiente para realizar esta transação'
-                ], 400);
-            }
+            throw new Exception('Este usuário não tem permissão para fazer uma transferência');
         }
-        catch(Exception $e)
+
+        if(!$this->validateFunds($request->payer, $request->value))
         {
-            throw new Exception($e);
+            throw new Exception('Este usuário não tem saldo suficiente para realizar esta transação');
         }
     }
 
     private function validateUserType($userId): bool
     {
         $userType = $this->userService->findTypeById($userId);
-        if($userType === 'pj')
-        {
-            return false;
-        }
-        return true;
+        return ($userType === 'pj') ? false : true;
     }
 
     private function validateFunds($userId, $amount): bool
     {
         $userBalance = $this->userService->findBalanceById($userId);
-        if($userBalance < $amount)
-        {
-            return false;
-        }
-        return true;
+        return ($userBalance < $amount) ? false : true;
     }
 
     private function verifyThirdService($step)
     {
-        return $this->validationService->validate($step);
+        $this->validationService->validate($step);
     }
 
     private function updateCustomersBalance($request)
