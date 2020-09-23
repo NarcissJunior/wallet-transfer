@@ -37,5 +37,4 @@ class Transaction extends Model
     {
         return ucfirst($value);
     }
-
 }
