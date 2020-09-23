@@ -2,6 +2,10 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
+use App\Exceptions\Handler;
+use Exception;
+
 use App\Services\ValidationService;
 use App\Services\UserService;
 use App\Models\Transaction;
@@ -28,6 +32,7 @@ class TransactionService
 
     public function create($request)
     {
+        DB::beginTransaction();
         try
         {
             $this->verifyTransaction($request);
@@ -36,31 +41,45 @@ class TransactionService
 
             $this->updateCustomersBalance($request);
 
-            return $this->verifyThirdService($this->secondStep);
+            $this->verifyThirdService($this->secondStep);
 
             $this->saveTransaction($request);
 
-        } catch (Throwable $e) {
-            throw new Exception($e->getMessage());
+            DB::commit();
         }
+        catch (Exception $e)
+        {
+            DB::rollBack();
+            throw new Exception($e);
+        }
+
+        return response()->json([
+            'message' => 'Transação realizada com sucesso!'
+        ], 200);
     }
 
     private function verifyTransaction($request)
     {
-        if(!$this->validateUserType($request->payer))
+        try
         {
-            return response()->json([
-                'error' => 'Este usuário não tem permissão para fazer uma transferência'
-            ], 400);
-        }
+            if(!$this->validateUserType($request->payer))
+            {
+                return response()->json([
+                    'error' => 'Este usuário não tem permissão para fazer uma transferência'
+                ], 400);
+            }
 
-        if(!$this->validateFunds($request->payer, $request->value))
-        {
-            return response()->json([
-                'error' => 'Este usuário não tem saldo suficiente para realizar esta transação'
-            ], 400);
+            if(!$this->validateFunds($request->payer, $request->value))
+            {
+                return response()->json([
+                    'error' => 'Este usuário não tem saldo suficiente para realizar esta transação'
+                ], 400);
+            }
         }
-        return true;
+        catch(Exception $e)
+        {
+            throw new Exception($e);
+        }
     }
 
     private function validateUserType($userId): bool
@@ -101,6 +120,6 @@ class TransactionService
             'value' => $request->value
             ]);
 
-        $this->transaction->save();
+        return $this->transaction->save();
     }
 }

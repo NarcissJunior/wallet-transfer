@@ -15,7 +15,6 @@ class ValidationService
         $this->request = $request;
     }
 
-
     //verificar
     public function validate($step)
     {
