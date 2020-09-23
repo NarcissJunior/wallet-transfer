@@ -9,7 +9,6 @@ use App\Models\User;
 
 class TransactionService
 {
-
     protected ValidationService $validationService;
     protected Transaction $transaction;
     protected UserService $userService;
@@ -18,8 +17,6 @@ class TransactionService
         ValidationService $validationService,
         Transaction $transaction,
         UserService $userService
-
-
     ) {
         $this->validationService = $validationService;
         $this->userService = $userService;
@@ -30,19 +27,17 @@ class TransactionService
     {
         try
         {
-            $this->transaction->fill([
-                'customer_payer_id' => $request->payer,
-                'customer_payee_id' => $request->payee,
-                'value' => $request->value
-            ]);
-
             $this->verifyTransaction($request);
-            // $this->transaction->save();
 
-            return $this->updateCustomersBalance($request);
+            $this->verifyThirdService(1);
+
+            $this->updateCustomersBalance($request);
+
+            $this->verifyThirdService(2);
+
+            $this->saveTransaction($request);
 
         } catch (Throwable $e) {
-
         }
     }
 
@@ -98,10 +93,20 @@ class TransactionService
         return true;
     }
 
-    
     private function updateCustomersBalance($request)
     {
         return $this->userService->updateBalance($request);
+    }
+
+    private function saveTransaction($request)
+    {
+        $this->transaction->fill([
+            'customer_payer_id' => $request->payer,
+            'customer_payee_id' => $request->payee,
+            'value' => $request->value
+            ]);
+
+        $this->transaction->save();
     }
 
 
