@@ -4,10 +4,8 @@ namespace App\Services;
 
 use App\Http\Requests\Request;
 
-
 class ValidationService
 {
-    private array $expectedResponse = ['Autorizado', 'Enviado'];
     protected Request $request;
     protected $method = 'GET';
 

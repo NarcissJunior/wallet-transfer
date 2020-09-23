@@ -50,7 +50,9 @@ class TransactionService
         catch (Exception $e)
         {
             DB::rollBack();
-            return $e->getMessage();
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 500);
         }
 
         return response()->json([
@@ -90,17 +92,22 @@ class TransactionService
 
     private function updateCustomersBalance($request)
     {
-        return $this->userService->updateBalance($request);
+        $this->userService->updateBalance($request);
     }
 
     private function saveTransaction($request)
     {
-        $this->transaction->fill([
-            'customer_payer_id' => $request->payer,
-            'customer_payee_id' => $request->payee,
-            'value' => $request->value
+        try
+        {
+            $this->transaction->fill([
+                'customer_payer_id' => $request->payer,
+                'customer_payee_id' => $request->payee,
+                'value' => $request->value
             ]);
-
+        } catch (Exception $e)
+        {
+            throw new Exception('Não foi possível cadastrar a transaçao no banco');
+        }
         return $this->transaction->save();
     }
 }
