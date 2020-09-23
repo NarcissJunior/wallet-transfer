@@ -29,11 +29,7 @@ class TransactionService
         {
             $this->verifyTransaction($request);
 
-            $this->verifyThirdService(1);
-
             $this->updateCustomersBalance($request);
-
-            $this->verifyThirdService(2);
 
             $this->saveTransaction($request);
 
