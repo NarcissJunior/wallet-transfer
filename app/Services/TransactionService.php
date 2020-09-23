@@ -13,6 +13,9 @@ class TransactionService
     protected Transaction $transaction;
     protected UserService $userService;
 
+    protected $firstStep = 1;
+    protected $secondStep = 1;
+
     public function __construct(
         ValidationService $validationService,
         Transaction $transaction,
@@ -29,11 +32,16 @@ class TransactionService
         {
             $this->verifyTransaction($request);
 
+            $this->verifyThirdService($this->firstStep);
+
             $this->updateCustomersBalance($request);
+
+            return $this->verifyThirdService($this->secondStep);
 
             $this->saveTransaction($request);
 
         } catch (Throwable $e) {
+            throw new Exception($e->getMessage());
         }
     }
 
@@ -50,14 +58,6 @@ class TransactionService
         {
             return response()->json([
                 'error' => 'Este usuário não tem saldo suficiente para realizar esta transação'
-            ], 400);
-        }
-
-        //verificar
-        if(!$this->validateThirdService())
-        {
-            return response()->json([
-                'error' => 'Esta transação não foi autorizada'
             ], 400);
         }
         return true;
@@ -83,10 +83,9 @@ class TransactionService
         return true;
     }
 
-    private function validateThirdService(): bool
+    private function verifyThirdService($step)
     {
-        $response = $this->validationService->validate('GET', 'https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6');
-        return true;
+        return $this->validationService->validate($step);
     }
 
     private function updateCustomersBalance($request)
@@ -104,19 +103,4 @@ class TransactionService
 
         $this->transaction->save();
     }
-
-
-    // //Inicio da transaction para atualizar o saldo
-    // DB::beginTransaction();
-    // try {
-    //     DB::commit();
-    // }
-    // catch (\Exception $e) {
-    //     DB::rollBack();
-    //     return response()->json([
-    //         'error' => 'Houve uma falha ao inserir os dados no banco'
-    //     ], 400);
-    //     //verificar
-    //     // throw new Exception($e->getMessage());
-    // }
 }
