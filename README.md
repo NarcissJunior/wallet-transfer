@@ -1,61 +1,93 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+Documentação Wallet-transfer
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+Comandos do Docker
 
-## About Laravel
+Rodar os containers:
+docker-compose up
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Listar containers:
+docker ps
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Parar os containers:
+docker-compose up
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Após subir os containers, execute o comando na raiz do projeto
+composer install
+para instalar as dependências.
 
-## Learning Laravel
+Após instalar as dependências, acesse a pasta do container
+cd docker
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Para enviar comandos ao Laravel (container wallet) é necessário informar ao Docker qual container receberá as informações. Para isso, basta inserir o prefixo abaixo e em seguida o comando desejado.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Enviar um comando para o Laravel:
+docker exec wallet [foo]
 
-## Laravel Sponsors
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Aqui você precisará rodar as migrações para ter o banco de dados do projeto.
 
-### Premium Partners
+Exemplo para rodar as migrações:
+docker exec wallet php artisan migrate:fresh
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[OP.GG](https://op.gg)**
+Após rodar as migrações é necessária popular o banco. Para fazer isso, iremos usar o artisan mais uma vez usando o comando abaixo.
 
-## Contributing
+Exemplo para rodar as Seeds criadas do BD:
+docker exec wallet php artisan db:seed
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Exemplos de comandos úteis
+Exemplo para criar migrações
+docker exec wallet php artisan make:migration create_foos_table
 
-## Code of Conduct
+Exemplo para criar as models:
+docker exec wallet php artisan make:model Foo
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Exemplo para dar rollback nas Migrações executadas:
+docker exec wallet php artisan migrate:reset
 
-## Security Vulnerabilities
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
+Postman
+O nginx do container foi configurado para rodar na porta 80.
+O BD está usando a porta padrão do MySQL, 3306.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Abaixo segue um exemplo de requisição para a API do projeto.
+Método: POST 
+Endpoint: localhost:80/api/transaction
+JSON com o payload: 
+{
+    "value" : 100.00,
+    "payer" : 4,
+    "payee" : 15
+}
+
+Retorno:
+{
+    "message" : "Transação realizada com sucesso."
+}
+
+Funcionamento
+
+A aplicação irá receber a requisição Http no endpoint api/transaction e enviar para o controller TransactionController. Após receber os dados, o controller irá validar o paylod para garantir a integridade dos dados recebidos. Após a sanitização dos dados, o payload é enviado para o TransactionService.
+No TransactionService são injetadas as dependências que serão usadas para realizar as tarefas.
+Serviço de validação: ValidationService
+Serviço do usuário: UserService
+Model da transação: Transaction;
+
+Dentro do serviço da transação, o primeiro passo é validar as regras de negócio que foram estabelecidas.
+Para isso, chamamos o método 
+verifyTransaction($request)
+que recebe o payload da transação.
+Dentro deste método, temos 3 funções que estendem outras classes e irão validar:
+1º - O Tipo do usuário, pois usuários do tipo PJ não podem enviar dinheiro para outros usuários.
+
+2º - O Saldo do usuário, pois é necessário ter a quantia enviada para efetuar a transação.
+
+3º - Um serviço externo, que no caso é um mock, mas pode ser adaptado para um serviço externo que necessite autorizar a transação.
+
+Caso a requisição não atende algum dos requisitos acima, uma exception é lançada com a descrição da validação.
+
+Caso a requisição atenda todas as validações, o método 
+updateCustomersBalance($request)
+é chamado. O método está implementado na classe UserService que foi injetada.
+O método é chamado com os parâmetros da request e ele é responsável por subtrair o valor do pagador e enviar o valor para o recebedor. Após isso, é feita a gravação dos dados no banco e retornamos para o TransactionService.
+Após tudo dar certo na atualização dos valores, verificamos novamente o mock externo para verificar se o valor foi enviado e salvamos a transação na tabela “Transaction” do BD.
